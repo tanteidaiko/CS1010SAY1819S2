@@ -14,25 +14,23 @@ from runes import *
 ##########
 
 def mosaic(pic1, pic2, pic3, pic4):
-    # Fill in code here
     return stack_frac(1/2,
                       beside(pic4, pic1),
                       beside(pic3, pic2))
 
 
 # Test
-show(mosaic(rcross_bb, sail_bb, corner_bb, nova_bb))
+#show(mosaic(rcross_bb, sail_bb, corner_bb, nova_bb))
 #show(mosaic(heart_bb , pentagram_bb , circle_bb , ribbon_bb ))
 
 ##########
 # Task 2 #
 ##########
-'''
-def simple_fractal(whateverpicture):
-    # Fill in code here
-    return beside(whateverpicture,
-                  stack(whateverpicture, whateverpicture))
-'''
+
+def simple_fractal(pic):
+    return beside(pic,
+                  stack(pic, pic))
+
 # Test
 #show(simple_fractal(make_cross(rcross_bb)))
 #show(simple_fractal(heart_bb )) 
