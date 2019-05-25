@@ -1,0 +1,98 @@
+#
+# CS1010S --- Programming Methodology
+#
+# Mission 3 - More than Thrice
+#
+
+###########
+# Task 1a #
+###########
+
+# Your answer here:
+# n = 9
+
+
+###########
+# Task 1b #
+###########
+
+# (i) print(thrice(thrice)(add1)(6))
+# Explanation: 33
+'''
+Output is  33
+
+thrice(thrice) = compose(compose(thrice,thrice),thrice)
+               = thrice(thrice(thrice())
+               
+thrice(thrice)(add1)(6) = thrice(thrice(thrice(add1))(6)
+                        = 6 + 27
+                        = 33
+'''
+
+# (ii) print(thrice(thrice)(identity)(compose))
+# Explanation:
+'''
+thrice(thrice) = thrice(thrice(thrice()) from part i
+
+thrice(thrice(thrice(identity))(compose) = thrice(thrice(identity))(compose)
+                                         = thrice(identity)(compose)
+                                         = identity(compose)
+                                         = compose
+'''
+
+# (iii) print(thrice(thrice)(sq)(1))
+# Explanation: 1
+'''
+thrice(thrice) = thrice(thrice(thrice()) from part i
+
+thrice(thrice)(sq)(1) = thrice(thrice(thrice(sq))(1)
+                      = 1, since the square of 1 is always 1
+'''
+
+# (iv) print(thrice(thrice)(sq)(2))
+# Explanation:
+'''
+thrice(thrice) = thrice(thrice(thrice()) from part i
+
+thrice(thrice)(sq)(2) = thrice(thrice(thrice(sq))(2)
+                      = 27 of sq(2)
+                      = ((2**2)**2)**2 .... until there is 27 **2
+                      = 2**(2**27)
+'''
+
+
+###########
+# Task 2a #
+###########
+
+def smiley_sum(t):
+    def f(x):
+        if x == 1:
+            return x
+        else:
+            return (x**2)*2
+
+    def op(x, y):
+        return x + y
+
+    n  = t + 1
+
+    # Do not modify this return statement
+    return combine(f, op, n)
+
+
+###########
+# Task 2b #
+###########
+
+def new_fib(n):
+    def f(x):
+        if x <= 1:
+            return x
+        else:
+            return new_fib(x-2)
+
+    def op(x, y):
+        return x + y
+
+    return combine(f, op, n+1)
