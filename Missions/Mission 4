@@ -1,0 +1,47 @@
+#
+# CS1010S --- Programming Methodology
+#
+# Mission 4 - Curve Introduction
+#
+
+##########
+# Task 1 #
+##########
+
+# (a)
+# unit_line_at_y : (Number) → Curve
+
+# (b)
+# a_line : (Unit-Interval) → Point
+
+# (c)
+def vertical_line(point, length):
+    return lambda t: make_point(x_of(point), y_of(point) + length*t)
+
+draw_points(1, vertical_line(make_point(0, 0), 1))
+
+# (d)
+# vertical_line : (Point, Number) → Curve
+
+# (e)
+# draw_connected(1, vertical_line(make_point(0.5, 0.25), 0.5))
+
+
+##########
+# Task 2 #
+##########
+
+# (a)
+'''
+We can compare both curves to see if their shapes are similar.
+Additionally, we can use x_of(point) and y_of(point) to ensure that
+the x-coordinate is now negative and the y-coordinate remained the same.
+'''
+
+# (b)
+def reflect_through_y_axis(curve):
+    def reflected_curve(t):
+        pt = curve(t)
+        return make_point(-x_of(pt), y_of(pt))
+
+    return reflected_curve
