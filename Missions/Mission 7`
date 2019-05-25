@@ -1,0 +1,297 @@
+#
+# CS1010S --- Programming Methodology
+#
+# Mission 7: Rogue Train
+#
+
+###########
+# Task 1a #
+###########
+
+def get_train_code(train):
+    return train[0]
+
+
+###########
+# Task 1b #
+###########
+
+def make_line(name, stations):
+    return (name, stations)
+
+def get_line_name(line):
+    return line[0]
+
+def get_line_stations(line):
+    return line[1]
+
+def get_station_by_name(line, station_name):
+    for stations in get_line_stations(line):
+        if get_station_name(stations) == station_name:
+            return stations
+    return None
+
+def get_station_by_code(line, station_code):
+    for stations in get_line_stations(line):
+        if get_station_code(stations) == station_code:
+            return stations
+    return None
+
+def get_station_position(line, station_code):
+    for stations in get_line_stations(line):
+        if get_station_code(stations) == station_code:
+            return get_line_stations(line).index(stations)
+    return -1
+
+
+###########
+# Task 1c #
+###########
+
+def make_train_position(is_moving, from_station, to_station):
+    ''' Do NOT modify this function'''
+    return (is_moving, from_station, to_station)
+
+def get_is_moving(train_position):
+    return train_position[0]
+
+def get_direction(line, train_position):
+    previous_station = get_station_position(line, get_station_code(train_position[1]))
+    next_station = get_station_position(line, get_station_code(train_position[2]))
+    if next_station > previous_station:
+        return 0
+    else:
+        return 1
+
+def get_stopped_station(train_position):
+    if get_is_moving(train_position):
+        return None
+    else:
+        return train_position[1]
+
+def get_previous_station(train_position):
+    if get_is_moving(train_position) == False:
+        return None
+    else:
+        return train_position[1]
+
+def get_next_station(train_position):
+    return train_position[2]
+
+
+
+###########
+# Task 1d #
+###########
+
+def make_schedule_event(train, train_position, time):
+    return (train, train_position, time)
+
+def get_train(schedule_event):
+    return schedule_event[0]
+
+def get_train_position(schedule_event):
+    return schedule_event[1]
+
+def get_schedule_time(schedule_event):
+    return schedule_event[2]
+
+
+###########
+# Task 2a #
+###########
+
+def parse_lines(data_file):
+    rows = read_csv(data_file)[1:] # list of all stations (code, station_name, line_name) 
+    lines = () # all lines and their respective stations 
+    curr_line_name = rows[0][2]
+    curr_line_stations = ()
+
+    for row in rows:
+        code, station_name, line_name = row
+        if line_name == curr_line_name:
+            curr_line_stations += (make_station(code, station_name),) # add line's station to a tuple
+        else:
+            lines += (make_line(curr_line_name, curr_line_stations),) # save stations of previous line as a whole
+            curr_line_name = line_name # change to new line to search
+            curr_line_stations = () # reset of stations for new line
+            curr_line_stations += (make_station(code, station_name),) # saving stations of the new line
+
+    lines += (make_line(curr_line_name, curr_line_stations),) # saving of final line & stations
+
+    return lines
+
+
+###########
+# Task 2b #
+###########
+
+def parse_events_in_line(data_file, line):
+    rows = read_csv(data_file)[1:]
+    events = ()
+
+    for row in rows:
+        train_code, is_moving, previous_station, next_station, date, time = row
+        train = make_train(train_code)
+        train_time = datetime.datetime(int(date[-4:]) , int(date[3:5]),
+                                       int(date[0:2]) , int(time[0:2]) ,
+                                       int(time[-2:]))
+
+        for stations in get_line_stations(line): # get_line_stations(line) is the tuple of stations
+            if previous_station == get_station_code(stations): # check if the current train is in the same line
+                previous_station2 = stations # adding list of previous station for this line
+            elif next_station == get_station_code(stations):
+                next_station2 = stations # adding list of next station for this line
+                 
+        train_position = make_train_position(is_moving == 'True', previous_station2, next_station2) # make position from stations
+                                                                                                    # use is_moving == "True" to change from string to boolean
+        train_event = make_schedule_event(train, train_position, train_time) # make schedule of train
+        events += (train_event,) # make list of schedule 
+        
+    return events
+
+
+###########
+# Task 3a #
+###########
+
+def is_valid_event_in_line(event, line):
+    
+    event_time = get_schedule_time(event)
+    train_pos = get_train_position(event)
+
+    if get_is_moving(train_pos):
+        prev_stop = get_previous_station(train_pos)
+    else:
+        prev_stop = get_stopped_station(train_pos)
+
+    next_stop = get_next_station(train_pos)
+    prev_stop_position = get_station_position(line, get_station_code(prev_stop))
+    next_stop_position = get_station_position(line, get_station_code(next_stop))
+    stop_index_difference = abs(next_stop_position - prev_stop_position)
+
+    if event_time.hour < 7:
+        return False
+    else:
+        if event_time.hour == 23:
+            if event_time.minute != 0 or event_time.second != 0:
+                return False
+            else:
+                return True
+        else:
+            return stop_index_difference == 1
+
+
+###########
+# Task 3b #
+###########
+
+def get_location_id_in_line(bd_event, line):
+    train_pos = get_train_position(bd_event)
+    location_id = None
+
+    if get_is_moving(train_pos):
+        prev_stop = get_previous_station(train_pos)
+        next_stop = get_next_station(train_pos)
+        prev_stop_position = get_station_position(line, get_station_code(prev_stop))
+        next_stop_position = get_station_position(line, get_station_code(next_stop))
+        tup_stops = (prev_stop_position, next_stop_position)
+        location_id = min(tup_stops) + 0.5
+
+    else:
+        prev_stop = get_stopped_station(train_pos)
+        prev_stop_position = get_station_position(line, get_station_code(prev_stop))
+        location_id = prev_stop_position
+        
+    return location_id
+
+
+###########
+# Task 4  #
+###########
+
+def get_schedules_at_time(train_schedule, time):
+    schedule = ()
+    for schedules in train_schedule:
+        if get_schedule_time(schedules) == time:
+            schedule += (schedules,)
+    return schedule
+
+def get_schedules_near_loc_id_in_line(train_schedule, line, loc_id):
+    schedule = ()
+    for schedules in train_schedule:
+        position_id = get_location_id_in_line(schedules, line)
+        if abs(position_id - loc_id) <= 0.5:
+            schedule += (schedules,)
+    return schedule
+
+            
+
+def get_rogue_schedules_in_line(train_schedule, line, time, loc_id):
+    schedule_at_time = get_schedules_at_time(train_schedule, time)
+    schedule = get_schedules_near_loc_id_in_line(schedule_at_time, line, loc_id) # within schedule_at_time, look for correct location
+    return schedule
+
+
+###########
+# Task 5a #
+###########
+
+def calculate_blame_in_line(full_schedule, valid_bd_events, line, scorer):
+    for events in valid_bd_events:
+        rogue_schedules = get_rogue_schedules_in_line(full_schedule,
+                                                      line,
+                                                      get_schedule_time(events),
+                                                      get_location_id_in_line(events, line))
+        list_to_blame = () # use this to ensure train is not double counted
+
+        for schedules in rogue_schedules:
+            train_to_blame = get_train_code(get_train(schedules))
+            if train_to_blame in list_to_blame: 
+                continue
+            else:
+                list_to_blame += (train_to_blame,)
+                scorer = blame_train(scorer , train_to_blame)
+
+    return scorer
+
+
+###########
+# Task 5b #
+###########
+
+def find_max_score(scorer):
+    list_of_scores = map(lambda ele: ele[1], get_blame_scores(scorer))
+    return max(list_of_scores)
+
+
+###########
+# Task 5c #
+###########
+
+I think that the hypothesis that the breakdown events are caused by a single rogue train holds.
+As we can see, Train 0-4 has a 180 blame score, as compare to other trains that have at most 18 blame scores. 
+
+By using the code below, 
+
+def f():
+    total_breakdown = 0
+    for i in get_valid_events_in_line(BD_EVENTS, CCL):
+        total_breakdown += 1
+    return total
+
+We see that the total number of valid breakdowns is 180. 
+And this is no mere coincidence. 
+This proves that Train 0-4 was in the vicinity of all 180 valid breakdowns. 
+We can thus conclude that breakdowns occur due to the presence of Train 0-4 itself. 
+
+
+###########
+# Task 5d #
+###########
+
+def find_rogue_train(scorer, max_score):
+    for trains in get_blame_scores(scorer):
+        if trains[1] == max_score:
+            return trains[0]
+
