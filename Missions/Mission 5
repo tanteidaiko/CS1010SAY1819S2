@@ -1,0 +1,66 @@
+#
+# CS1010S --- Programming Methodology
+#
+# Mission 5 - Curve Manipulation
+#
+
+##########
+# Task 1 #
+##########
+
+def connect_rigidly (curve1 , curve2):
+    def connected_curve(t):
+        if (t < 0.5):
+            return curve1(2*t)
+        else:
+            return curve2(2*t - 1)
+        return connected_curve
+
+def connect_ends(curve1, curve2):
+    x_distance = x_of(curve1(1)) - x_of(curve2(0))
+    y_distance = y_of(curve1(1)) - y_of(curve2(0))
+    translated_curve2 = translate(x_distance, y_distance)(curve2)
+    return connect_rigidly(curve1, translated_curve2)
+
+
+##########
+# Task 2 #
+##########
+
+def show_points_gosper(level, num_points, initial_curve):
+
+    def gosperize(curve):
+        scaled_curve = scale(sqrt(2)/2)( curve)
+        left_curve = rotate(pi/4)( scaled_curve)
+        right_curve = translate(0.5,0.5)( rotate(-pi/4)( scaled_curve ))
+        return connect_rigidly(left_curve , right_curve)
+
+    def gosper_curve(level):
+        return repeated(gosperize , level)(initial_curve)
+    
+    def show_points_gosper(level):
+        squeezed_curve = squeeze_curve_to_rect(-0.5, -0.5, 1.5, 1.5)\
+                         (gosper_curve(level))
+        draw_points(num_points, squeezed_curve)
+        
+    return show_points_gosper(level)
+
+
+##########
+# Task 3 #
+##########
+
+def your_gosper_curve_with_angle(level, angle_at_level):
+    if level == 0:
+        return unit_line
+    else:
+        return your_gosperize_with_angle(angle_at_level(level))\
+               (your_gosper_curve_with_angle(level-1, angle_at_level))
+
+def your_gosperize_with_angle(theta):
+    def inner_gosperize(curve_fn):
+        left_curve = rotate(theta)(curve_fn)
+        right_curve = rotate(-theta)(curve_fn)
+        return put_in_standard_position(connect_ends(left_curve, right_curve))
+    return inner_gosperize
+
