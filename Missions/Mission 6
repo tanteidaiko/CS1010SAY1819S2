@@ -1,0 +1,138 @@
+#
+# CS1010S --- Programming Methodology
+#
+# Mission 6: Diagnostics
+#
+
+def your_gosper_curve_with_angle(level, angle_at_level):
+    if level == 0:
+        return unit_line
+    else:
+        return your_gosperize_with_angle(angle_at_level(level))\
+               (your_gosper_curve_with_angle(level-1, angle_at_level))
+
+def your_gosperize_with_angle(theta):
+    def inner_gosperize(curve_fn):
+        left_curve = rotate(theta)(curve_fn)
+        right_curve = rotate(-theta)(curve_fn)
+        return put_in_standard_position(connect_ends(left_curve, right_curve))
+    return inner_gosperize
+
+# Do not copy any other functions beyond this line #
+
+##########
+# Task 1 #
+##########
+
+# Example from the mission description on the usage of time function:
+# profile_fn(lambda: gosper_curve(10)(0.1), 50)
+
+# Choose a significant level for testing for all three sets of functions.
+
+# -------------
+# gosper_curve:
+# -------------
+# write down and invoke the function that you are using for this testing
+# in the space below
+
+profile_fn(lambda: gosper_curve(69)(0.2), 50)
+
+# Time measurements
+#  <...your time measurements here...>
+25.379900000000788
+28.588800000001413
+24.378500000011627
+25.217800000007173
+27.87230000001273
+#  <...do for at least 5 times and take the average...>
+26.287460000006746
+
+# ------------------------
+# gosper_curve_with_angle:
+# ------------------------
+# write down and invoke the function that you are using for this testing
+# in the space below
+
+profile_fn(lambda: gosper_curve_with_angle(69, lambda lvl: pi/4)(0.2), 50)
+
+#  <...your time measurements here...>
+22.422499999999346
+23.454399999998543
+23.300800000015442
+29.192500000021937
+22.818599999993694
+#  <...do for at least 5 times and take the average...>
+24.237760000005792
+
+# -----------------------------
+# your_gosper_curve_with_angle:
+# -----------------------------
+# write down and invoke the function that you are using for this testing
+# in the space below
+
+profile_fn(lambda: your_gosper_curve_with_angle(69, lambda lvl: pi/4)(0.2), 50)
+
+#  <...your time measurements here...>
+2870.6072999999997
+3064.5127000000016
+2937.7123999999953
+3035.4829999999993
+3030.1983999999893
+#  <...do for at least 5 times and take the average...>
+2987.7027599999974
+
+# Conclusion:
+#  <...your conclusion here...>
+'''
+As we can see, both gosper_curve and gosper_curve_with_angle takes relatively 
+the same amount of time to produce the output.
+But for your_gosper_curve_with_angle, it takes considerally much longer for 
+output to be produced.
+As a result, i conclude that a function that is a more general function may not 
+have any speed advantage compared to a more specific function. 
+'''
+
+
+##########
+# Task 2 #
+##########
+
+#  1) your explanation here
+'''
+Yes, joe_rotate does work and achieve the same purpose in rotating the
+curve in a certain angle.
+'''
+
+#  2) your explanation here
+'''
+Looking at the defition of gosper_curve() and gosperize().
+When gosperize() is called, we would call on rotate() / joe_rotate() function.
+rotate() / joe_rotate() would then go on to call rotated_curve(t). For the
+rotataed_curve(t) of joe_rotate(), we make calls to curve(t) twice, compared
+to using pt = curve(t) in rotate(), where the call to curve(t) occurs once.
+Thus, we can see that by calling curve(t) once at every level of
+gosper_curve() using rotate(), we would get a linear time complexity.
+And by calling curve(t) twice at every level of gosper_curve() using
+joe_rotate(), we would get an exponential growth since repeated() is involved.
+'''
+
+
+##########
+# Task 3 #
+##########
+
+#
+# Fill in this table:
+#
+#                    level      rotate       joe_rotate
+#                      1         <3>            <4>
+#                      2         <5>            <10>
+#                      3         <7>            <22>
+#                      4         <9>            <46>
+#                      5         <11>           <94>
+#
+#  Evidence of exponential growth in joe_rotate.
+
+
+
+
